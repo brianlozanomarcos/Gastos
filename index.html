@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Protected Page</title>
+  <title>Gastos</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -21,13 +21,16 @@
       border-radius: 8px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
-    .buttons {
+    .buttons, .form, .expenses {
       margin-top: 20px;
     }
     button {
       margin: 5px;
       padding: 10px 20px;
       font-size: 16px;
+    }
+    .hidden {
+      display: none;
     }
   </style>
 </head>
@@ -42,21 +45,82 @@
           <div class="container">
             <h1>Gastos</h1>
             <div class="buttons">
+              <button onclick="showForm()">Añadir Gastos</button>
               <button onclick="viewGastos()">Ver Gastos</button>
-              <button onclick="addGastos()">Añadir Gastos</button>
+            </div>
+            <div class="form hidden" id="addGastoForm">
+              <h2>Añadir Gasto</h2>
+              <input type="number" id="cantidad" placeholder="Cantidad" required><br>
+              <input type="text" id="nombre" placeholder="Nombre" required><br>
+              <input type="date" id="fecha" required><br>
+              <button onclick="addGasto()">Enviar</button>
+            </div>
+            <div class="expenses hidden" id="gastosList">
+              <h2>Gastos</h2>
+              <div id="gastosContent"></div>
             </div>
           </div>
         `;
       }
 
-      function viewGastos() {
-        alert("Ver Gastos clicked!");
-        // Aquí puedes agregar la lógica para ver los gastos
+      function showForm() {
+        document.getElementById('addGastoForm').classList.remove('hidden');
+        document.getElementById('gastosList').classList.add('hidden');
       }
 
-      function addGastos() {
-        alert("Añadir Gastos clicked!");
-        // Aquí puedes agregar la lógica para añadir los gastos
+      function viewGastos() {
+        document.getElementById('addGastoForm').classList.add('hidden');
+        document.getElementById('gastosList').classList.remove('hidden');
+        displayGastos();
+      }
+
+      function addGasto() {
+        const cantidad = document.getElementById('cantidad').value;
+        const nombre = document.getElementById('nombre').value;
+        const fecha = document.getElementById('fecha').value;
+        
+        if (cantidad && nombre && fecha) {
+          const gastos = JSON.parse(localStorage.getItem('gastos')) || [];
+          gastos.push({ cantidad, nombre, fecha });
+          localStorage.setItem('gastos', JSON.stringify(gastos));
+          alert("Gasto añadido exitosamente");
+          document.getElementById('addGastoForm').reset();
+          showForm();
+        } else {
+          alert("Por favor, rellena todos los campos.");
+        }
+      }
+
+      function displayGastos() {
+        const gastos = JSON.parse(localStorage.getItem('gastos')) || [];
+        const gastosContent = document.getElementById('gastosContent');
+        gastosContent.innerHTML = '';
+
+        if (gastos.length === 0) {
+          gastosContent.innerHTML = "<p>No hay gastos registrados.</p>";
+          return;
+        }
+
+        const gastosByMonth = {};
+        
+        gastos.forEach(gasto => {
+          const month = new Date(gasto.fecha).toLocaleString('default', { month: 'long', year: 'numeric' });
+          if (!gastosByMonth[month]) {
+            gastosByMonth[month] = [];
+          }
+          gastosByMonth[month].push(gasto);
+        });
+
+        for (const month in gastosByMonth) {
+          const monthSection = document.createElement('div');
+          monthSection.innerHTML = `<h3>${month}</h3>`;
+          gastosByMonth[month].forEach(gasto => {
+            const gastoItem = document.createElement('p');
+            gastoItem.textContent = `Cantidad: ${gasto.cantidad}, Nombre: ${gasto.nombre}, Fecha: ${gasto.fecha}`;
+            monthSection.appendChild(gastoItem);
+          });
+          gastosContent.appendChild(monthSection);
+        }
       }
     </script>
   </div>
