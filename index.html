@@ -32,6 +32,18 @@
     .hidden {
       display: none;
     }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 8px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
   </style>
 </head>
 <body>
@@ -78,13 +90,15 @@
         const cantidad = document.getElementById('cantidad').value;
         const nombre = document.getElementById('nombre').value;
         const fecha = document.getElementById('fecha').value;
-        
+
         if (cantidad && nombre && fecha) {
           const gastos = JSON.parse(localStorage.getItem('gastos')) || [];
-          gastos.push({ cantidad, nombre, fecha });
+          gastos.push({ cantidad: parseFloat(cantidad), nombre, fecha });
           localStorage.setItem('gastos', JSON.stringify(gastos));
           alert("Gasto añadido exitosamente");
-          document.getElementById('addGastoForm').reset();
+          document.getElementById('cantidad').value = '';
+          document.getElementById('nombre').value = '';
+          document.getElementById('fecha').value = '';
           showForm();
         } else {
           alert("Por favor, rellena todos los campos.");
@@ -102,6 +116,7 @@
         }
 
         const gastosByMonth = {};
+        let totalGastos = 0;
         
         gastos.forEach(gasto => {
           const month = new Date(gasto.fecha).toLocaleString('default', { month: 'long', year: 'numeric' });
@@ -109,18 +124,43 @@
             gastosByMonth[month] = [];
           }
           gastosByMonth[month].push(gasto);
+          totalGastos += gasto.cantidad;
         });
 
         for (const month in gastosByMonth) {
           const monthSection = document.createElement('div');
           monthSection.innerHTML = `<h3>${month}</h3>`;
+          
+          const table = document.createElement('table');
+          const thead = document.createElement('thead');
+          thead.innerHTML = `
+            <tr>
+              <th>Cantidad</th>
+              <th>Nombre</th>
+              <th>Fecha</th>
+            </tr>
+          `;
+          table.appendChild(thead);
+
+          const tbody = document.createElement('tbody');
           gastosByMonth[month].forEach(gasto => {
-            const gastoItem = document.createElement('p');
-            gastoItem.textContent = `Cantidad: ${gasto.cantidad}, Nombre: ${gasto.nombre}, Fecha: ${gasto.fecha}`;
-            monthSection.appendChild(gastoItem);
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${gasto.cantidad}</td>
+              <td>${gasto.nombre}</td>
+              <td>${gasto.fecha}</td>
+            `;
+            tbody.appendChild(row);
           });
+          table.appendChild(tbody);
+          monthSection.appendChild(table);
+
           gastosContent.appendChild(monthSection);
         }
+
+        const totalSection = document.createElement('div');
+        totalSection.innerHTML = `<h3>Total Gastado: ${totalGastos.toFixed(2)}</h3>`;
+        gastosContent.appendChild(totalSection);
       }
     </script>
   </div>
