@@ -50,7 +50,7 @@
   <div class="container">
     <script>
       const password = prompt("Enter password:");
-      if (password !== 'lira291001') {
+      if (password !== 'your-password-here') {
         document.body.innerHTML = "Access Denied";
       } else {
         document.body.innerHTML = `
@@ -87,13 +87,13 @@
       }
 
       function addGasto() {
-        const cantidad = document.getElementById('cantidad').value;
+        const cantidad = parseFloat(document.getElementById('cantidad').value);
         const nombre = document.getElementById('nombre').value;
         const fecha = document.getElementById('fecha').value;
 
         if (cantidad && nombre && fecha) {
           const gastos = JSON.parse(localStorage.getItem('gastos')) || [];
-          gastos.push({ cantidad: parseFloat(cantidad), nombre, fecha });
+          gastos.push({ cantidad, nombre, fecha });
           localStorage.setItem('gastos', JSON.stringify(gastos));
           alert("Gasto añadido exitosamente");
           document.getElementById('cantidad').value = '';
@@ -146,7 +146,7 @@
           gastosByMonth[month].forEach(gasto => {
             const row = document.createElement('tr');
             row.innerHTML = `
-              <td>${gasto.cantidad}</td>
+              <td>${gasto.cantidad.toFixed(2)}</td>
               <td>${gasto.nombre}</td>
               <td>${gasto.fecha}</td>
             `;
